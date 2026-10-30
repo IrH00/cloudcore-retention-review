@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CloudCore Retention Review Assistant</title>
+  <style>
+    :root{--ink:#102a43;--muted:#52667a;--line:#d9e2ec;--panel:#fff;--bg:#f4f7fb;--blue:#0c5f99;--amber:#a05a00;--green:#147d64}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 Arial,sans-serif} header{background:#092e4c;color:white;padding:30px max(22px,calc((100vw - 1160px)/2));} h1{margin:0;font-size:29px} header p{max-width:820px;margin:8px 0 0;color:#dbeafe}.wrap{max-width:1160px;margin:22px auto;padding:0 22px}.notice{border-left:4px solid var(--amber);background:#fff8e8;padding:13px 16px;margin:0 0 20px}.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:18px 0}.metric,.card,.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px;box-shadow:0 2px 5px #102a4309}.metric strong{display:block;font-size:23px;color:var(--blue)}.metric span{color:var(--muted);font-size:13px}.layout{display:grid;grid-template-columns:330px 1fr;gap:20px}.watch-item{width:100%;text-align:left;border:1px solid var(--line);background:white;border-radius:8px;margin:8px 0;padding:12px;cursor:pointer}.watch-item:hover,.watch-item.active{border-color:var(--blue);background:#eef7fd}.score{float:right;color:var(--amber);font-weight:bold}.eyebrow{font-size:12px;font-weight:bold;color:var(--blue);letter-spacing:.06em;text-transform:uppercase}.panel h2{margin:2px 0 8px;font-size:22px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.fact{margin:3px 0}.fact b{color:var(--muted)} .section{margin-top:16px;border-top:1px solid var(--line);padding-top:13px}.source{border-left:3px solid #79b8de;padding:9px 11px;margin:8px 0;background:#f7fbfe}.source small{color:var(--muted)}.factor{display:inline-block;border-radius:18px;padding:6px 10px;margin:3px;background:#e9f5f1;color:#135c4c}.questions li{margin:7px 0}.hidden{display:none}@media(max-width:760px){.layout{grid-template-columns:1fr}.metrics,.grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<header><h1>CloudCore Retention Review Assistant</h1><p>Demonstration watchlist for Customer Success human review. Every displayed item is traceable to the supplied CloudCore extracts.</p></header>
+<main class="wrap">
+  <div class="notice"><strong>Human decision required.</strong> This tool prioritises accounts for review only. It does not establish why a customer may leave, contact customers, or approve any retention action.</div>
+  <div class="metrics" id="metrics"></div>
+  <div class="layout"><aside class="card"><div class="eyebrow">Five-account watchlist</div><div id="watchlist"></div></aside><section class="panel" id="detail"></section></div>
+</main>
+<script src="assistant_data.js"></script>
+<script>
+const data=window.ASSISTANT_DATA; let selected=data.watchlist[0].customer_id;
+const money=v=>new Intl.NumberFormat('en-US',{style:'currency',currency:'USD',maximumFractionDigits:0}).format(v);
+function render(){
+ document.querySelector('#metrics').innerHTML=[['ROC AUC',data.metrics.roc_auc],['Precision',data.metrics.precision],['Recall',data.metrics.recall]].map(([n,v])=>`<div class="metric"><strong>${(v*100).toFixed(1)}%</strong><span>${n} - 10-fold out-of-fold</span></div>`).join('');
+ document.querySelector('#watchlist').innerHTML=data.watchlist.map(x=>`<button class="watch-item ${x.customer_id===selected?'active':''}" onclick="pick('${x.customer_id}')"><span class="score">${(x.model_probability*100).toFixed(1)}%</span><b>${x.rank}. ${x.company_name}</b><br><small>${x.customer_id} - review priority</small></button>`).join('');
+ const x=data.assistant_cases.find(x=>x.profile.customer_id===selected); const factors=x.model_factors.map(f=>`<span class="factor">${f.label}</span>`).join('');
+ const tickets=x.tickets.length?x.tickets.map(t=>`<div class="source"><small>${t.source_id} | ${t.date} | ${t.product} | ${t.channel} | CSAT ${t.satisfaction_score}</small><br>${t.text}</div>`).join(''):'<p>No ticket in supplied extract.</p>';
+ const reviews=x.reviews.length?x.reviews.map(r=>`<div class="source"><small>${r.source_id} | ${r.product} | rating ${r.rating}</small><br>${r.text}</div>`).join(''):'<p>No review in supplied extract.</p>';
+ document.querySelector('#detail').innerHTML=`<div class="eyebrow">Selected account</div><h2>${x.profile.company_name} <span style="color:var(--amber);font-size:17px">${(x.model_probability*100).toFixed(1)}% review score</span></h2><p>The score is a fitted-model prioritisation signal for this historical demonstration. Check current account context before taking any action.</p><div class="grid"><div><h3>Profile</h3><p class="fact"><b>Customer:</b> ${x.profile.customer_id}</p><p class="fact"><b>Industry:</b> ${x.profile.industry}</p><p class="fact"><b>Tenure:</b> ${x.profile.tenure_months} months</p><p class="fact"><b>Products:</b> ${x.profile.products}</p><p class="fact"><b>Support:</b> ${x.profile.support_tier}</p><p class="fact"><b>MRR:</b> ${money(x.profile.monthly_recurring_revenue)}</p></div><div><h3>Usage and billing</h3><p class="fact"><b>Source:</b> ${x.usage_billing.source_id} (${x.usage_billing.billing_month})</p><p class="fact"><b>Storage:</b> ${x.usage_billing.storage_gb.toLocaleString()} GB</p><p class="fact"><b>API calls:</b> ${x.usage_billing.api_calls.toLocaleString()}</p><p class="fact"><b>Seats:</b> ${x.usage_billing.seats}</p><p class="fact"><b>Billing:</b> ${money(x.usage_billing.billing_amount)}</p><p class="fact"><b>MRR/billing match:</b> ${x.usage_billing.mrr_matches_billing_amount?'Yes':'No - verify'}</p></div></div><div class="section"><h3>Positive model contributions to check</h3><p>${factors||'No positive contributions displayed.'}</p><small>These are model associations, not causes of churn.</small></div><div class="section"><h3>Latest ticket evidence in supplied extract</h3>${tickets}</div><div class="section"><h3>Review evidence in supplied extract</h3>${reviews}</div><div class="section"><h3>Human review questions</h3><ul class="questions"><li>What current renewal, usage, escalation, or relationship information is missing here?</li><li>Are these historical records still relevant today?</li><li>Is outreach justified by verified context, and what action can the employee explain?</li></ul></div>`;
+}
+function pick(id){selected=id;render()} render();
+</script></body></html>
