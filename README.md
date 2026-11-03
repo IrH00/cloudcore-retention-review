@@ -1,34 +1,57 @@
+<div align="center">
+
 # CloudCore Retention Review Assistant
 
-A classroom decision-support prototype for ISYS6014. The site ranks the 280 customers in the supplied CloudCore extract and brings profile, usage, billing, support and review evidence together for a Customer Success employee to review.
+### A human-in-the-loop workspace for prioritising Customer Success reviews
 
-## Using the demonstration
+[![Open the live website](https://img.shields.io/badge/Live%20demo-Open%20website-4F46E5?style=for-the-badge&logo=githubpages&logoColor=white)](https://irh00.github.io/cloudcore-retention-review/)
+[![Human review required](https://img.shields.io/badge/Decision%20boundary-Human%20review%20required-0F766E?style=for-the-badge&logo=shield&logoColor=white)](https://irh00.github.io/cloudcore-retention-review/)
+[![Classroom prototype](https://img.shields.io/badge/ISYS6014-Classroom%20prototype-7C3AED?style=for-the-badge&logo=graduationcap&logoColor=white)](https://irh00.github.io/cloudcore-retention-review/)
 
-Open an account card to see its evidence. Use Ctrl+F (Cmd+F on a Mac) to find a customer by name or ID. Rank-band links provide shortcuts through the queue. Each card shows up to the latest three tickets and all reviews found in the supplied extracts.
+**[Open the website →](https://irh00.github.io/cloudcore-retention-review/)**
 
-## How the model works
+</div>
 
-Python builds a Logistic Regression model using industry, support tier, tenure, monthly recurring revenue and derived product count. Region, customer identifiers, customer names and raw product mix are excluded as model inputs. `churn_flag` is the training target.
+## What is this?
 
-The displayed account scores come from a model fitted on the same 280 accounts. They are in-sample review signals, not independently validated individual predictions. The headline metrics use stratified 10-fold out-of-fold predictions; precision and recall use a 0.50 threshold.
+CloudCore Retention Review Assistant is a classroom decision-support prototype for Customer Success. It helps employees decide **which customer accounts to review first** by bringing historical profile, usage, billing, support-ticket and review evidence into one place.
 
-The target combines customers who churned and customers flagged at risk. Scores are therefore not confirmed future-churn probabilities. Model associations are not causes. A person must verify current context and decide whether any action is appropriate. The prototype does not contact customers or make retention decisions.
+It is designed to support professional judgement—not replace it.
 
-Usage and billing are a single May 2026 snapshot and cannot establish trends. Support tickets and reviews are historical extracts, not live account status. This is not production software.
+## Start in three steps
 
-## Technology and deployment
+| Step | What to do |
+|---|---|
+| **1. Review the account** | Start with the Top 5 queue or search for a specific company. Read the historical evidence in the account card. |
+| **2. Check current context** | Verify renewal timing, recent escalations, current usage and account-owner notes in CloudCore’s current systems. |
+| **3. Choose and record action** | Contact, monitor, resolve an issue, or close as no action—then record the reason for the decision. |
 
-`build_assistant.py` prepares the model and evidence; `render_python_site.py` generates the static HTML/CSS page. The website uses no JavaScript or live data connection. GitHub Pages serves the generated page; it does not execute Python.
+## What the website includes
 
-To publish the prepared version, upload `index.html` to the repository root on `main` and replace the previous file. Upload this `README.md` to the same location to update the repository description. The site contains the displayed classroom customer and support data; publishing the page makes that content public.
+| Feature | Purpose |
+|---|---|
+| **Customer review queue** | Ranks the 280 supplied customer accounts as a practical review order. |
+| **Account search** | Finds an account by company, customer ID, industry, region, product or support tier. |
+| **Evidence cards** | Shows customer profile, May 2026 usage/billing context, recent supplied tickets and reviews. |
+| **Human-evidence checks** | For the five highest-priority accounts, highlights historical evidence that supports, challenges or does not clarify the queue position. |
+| **Data guide** | A minimisable guide explaining the fields, source IDs, scores and limitations. |
 
-To reproduce locally, place the four provided CSVs in a `project_sources` folder beside the project folder, using their prefixed filenames (`01-cloudcore_reviews.csv`, `03-cloudcore_transactions.csv`, `04-cloudcore_support_tickets.csv`, `05-cloudcore_customers.csv`). Install Python with `numpy`, `pandas` and `scikit-learn`, then run `python build_assistant.py` from the project folder. The result is `dist/index.html`. Run tests with `python -m unittest tests/test_assistant.py`.
+## Reading the queue responsibly
 
-## Data sources
+> **A high score means “review this account sooner.” It does not mean “this customer will churn.”**
 
-- Customers: profile, model inputs and historical target.
-- Transactions: May 2026 usage and billing snapshot.
-- Support tickets: latest three available records per customer.
-- Reviews: supplied customer review records.
+- The review score is a historical Logistic Regression prioritisation signal, not a confirmed future-churn probability.
+- Model associations are not explanations or causes of churn.
+- The displayed usage and billing information is a single May 2026 snapshot; it cannot show a trend.
+- Support tickets and reviews are historical supplied records, not live CRM status.
+- The prototype cannot contact customers, approve an action or make an automatic retention decision.
 
-Record IDs shown on the page support traceability to the supplied extracts.
+## Data basis
+
+This demonstration uses the **280-customer consultant engagement extract** created for the CloudCore classroom scenario. In this dataset, `churn_flag = 1` means an account had **churned or been flagged at risk** during the historical observation window. Monetary values are shown in USD.
+
+The separate 400-customer public portfolio is intentionally excluded: it has a different population, currency and churn definition. The two data families must not be combined.
+
+## Classroom context
+
+Built as part of **ISYS6014 — AI-Driven Knowledge Systems**. CloudCore Networks, its customer records and all displayed data are fictional classroom material. This is a static demonstration with no live system connection.
