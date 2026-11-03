@@ -5,10 +5,6 @@
 ### A human-in-the-loop workspace for prioritising Customer Success reviews
 
 [![Open the live website](https://img.shields.io/badge/Live%20demo-Open%20website-4F46E5?style=for-the-badge&logo=githubpages&logoColor=white)](https://irh00.github.io/cloudcore-retention-review/)
-[![Human review required](https://img.shields.io/badge/Decision%20boundary-Human%20review%20required-0F766E?style=for-the-badge&logo=shield&logoColor=white)](https://irh00.github.io/cloudcore-retention-review/)
-[![Classroom prototype](https://img.shields.io/badge/ISYS6014-Classroom%20prototype-7C3AED?style=for-the-badge&logo=graduationcap&logoColor=white)](https://irh00.github.io/cloudcore-retention-review/)
-
-**[Open the website →](https://irh00.github.io/cloudcore-retention-review/)**
 
 </div>
 
